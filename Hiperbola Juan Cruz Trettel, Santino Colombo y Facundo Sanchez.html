@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>La Hipérbola — Página Interactiva Completa</title>
+<style>
+:root{ --bg:#06060a; --panel:#0f1418; --neon:#1a73e8; --neon2:#00d4ff; --accent:#7a00ff; --text:#e6eef8; }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Helvetica,Arial;background:radial-gradient(circle at 10% 10%, rgba(26,115,232,0.06), transparent 15%),var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.header{position:sticky;top:0;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));backdrop-filter:blur(6px);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.02);z-index:40}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--neon),var(--neon2));display:flex;align-items:center;justify-content:center;color:#021;font-weight:800}
+.title{font-size:18px;font-weight:700;color:var(--neon)}
+.subtitle{font-size:12px;color:#9fb6d9}
+.container{max-width:1150px;margin:18px auto;padding:12px}
+.layout{display:grid;grid-template-columns:280px 1fr;gap:18px}
+.sidebar{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);min-height:420px}
+.navbtn{display:block;width:100%;padding:10px;border-radius:10px;border:none;background:transparent;color:var(--text);text-align:left;font-weight:700;margin-bottom:8px;cursor:pointer;transition:all .18s}
+.navbtn:hover{transform:translateX(6px);color:var(--neon2)}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 10px 30px rgba(8,10,12,0.6)}
+.hero{display:flex;flex-direction:column;gap:10px}
+.h-title{font-size:28px;color:var(--neon);margin:0}
+.h-sub{color:#9fb6d9}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.btn{background:linear-gradient(90deg,var(--neon),var(--neon2));color:#021;border:none;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer;box-shadow:0 8px 30px rgba(26,115,232,0.12);transition:transform .12s}
+.btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)}
+.section{margin-top:16px}
+.small{font-size:13px;color:#9fb6d9}
+.graph-wrap{display:flex;gap:12px;align-items:flex-start}
+#svgBox{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:10px;border-radius:10px}
+svg{width:760px;height:460px;display:block}
+.legend{min-width:260px}
+.chip{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;margin-bottom:10px;color:#d9f3ff}
+.input{width:80px;background:transparent;border:none;border-bottom:1px dashed rgba(255,255,255,0.06);color:var(--text);padding:6px}
+.quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.quiz-card{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015));padding:14px;border-radius:10px}
+.option{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;margin-top:8px}
+.option:hover{background:rgba(255,255,255,0.02)}
+.option.correct{border-color:rgba(0,200,120,0.7);background:rgba(0,200,120,0.06)}
+.option.wrong{border-color:rgba(200,50,50,0.7);background:rgba(200,50,50,0.04)}
+.result{font-size:18px;margin-top:10px}
+.code{background:#071225;padding:12px;border-radius:8px;color:#bfe9ff;overflow:auto}
+@media(max-width:980px){.layout{grid-template-columns:1fr;}.legend{order:2}.graph-wrap{flex-direction:column}svg{width:100%;height:320px}}
+@media(max-width:520px){.h-title{font-size:20px}.btn{padding:8px;font-size:14px}.sidebar{display:none}}
+.fade-in{animation:fadeIn .6s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+
+<script>
+// ensure gotoSection exists early
+window.gotoSection = function(id){
+  try{
+    document.querySelectorAll('main > section').forEach(s=> s.style.display='none');
+    const target = document.getElementById(id);
+    if(target) target.style.display = 'block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){console.error(e)}
+};
+</script>
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <div class="logo">H</div>
+      <div>
+        <div class="title">La Hipérbola</div>
+        <div class="subtitle">Una figura cónica — Interactivo</div>
+      </div>
+    </div>
+    <nav class="small">
+      <button class="btn secondary" onclick="gotoSection('start')">Inicio</button>
+      <button class="btn" onclick="openShare()">Exportar</button>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="layout">
+      <aside class="sidebar card fade-in" role="navigation" aria-label="menu lateral">
+        <button class="navbtn" onclick="gotoSection('start')">Inicio</button>
+        <button class="navbtn" onclick="gotoSection('definition')">Definición</button>
+        <button class="navbtn" onclick="gotoSection('equation')">Fórmulas</button>
+        <button class="navbtn" onclick="gotoSection('graph')">Gráfica interactiva</button>
+        <button class="navbtn" onclick="gotoSection('exercises')">Ejercicios</button>
+        <button class="navbtn" onclick="gotoSection('quiz')">Quiz</button>
+        <button class="navbtn" onclick="gotoSection('applications')">Aplicaciones</button>
+      </aside>
+
+      <main>
+        <section id="start" class="card hero fade-in">
+          <h2 class="h-title">Explora la Hipérbola</h2>
+          <p class="h-sub">Definición, fórmulas, gráfica interactiva y ejercicios.</p>
+          <div class="controls">
+            <button class="btn" onclick="gotoSection('definition')">Comenzar</button>
+            <button class="btn secondary" onclick="gotoSection('graph')">Ir a gráfica</button>
+          </div>
+        </section>
+
+        <section id="definition" class="card section fade-in">
+          <h3>Definición</h3>
+          <p>Una hipérbola es una curva abierta de dos ramas definida por una condición de distancia con los focos. Se define geométricamente como el lugar de los puntos del plano donde la diferencia de sus distancias a dos puntos fijos (los focos) es constante.</p>
+          <p>La ecuación canónica depende de la orientación del eje y de la posición del centro; ver la sección de fórmulas para los casos horizontal, vertical y trasladado.</p>
+        </section>
+
+        <section id="equation" class="card section fade-in">
+  <h3>Fórmulas</h3>
+
+  <h4>Hipérbola horizontal (centro en el origen)</h4>
+  <p>(x² / a²) − (y² / b²) = 1</p>
+  <p>Vértices: (±a,0) — Focos: (±c,0) — Asíntotas: y = ±(b/a)x — c² = a² + b²</p>
+
+  <h4>Hipérbola vertical (centro en el origen)</h4>
+  <p>(y² / a²) − (x² / b²) = 1</p>
+  <p>Vértices: (0,±a) — Focos: (0,±c) — Asíntotas: y = ±(a/b)x — c² = a² + b²</p>
+
+  <h4>Hipérbola horizontal (centro en (h,k))</h4>
+  <p>((x−h)² / a²) − ((y−k)² / b²) = 1</p>
+  <p>Vértices: (h±a,k) — Focos: (h±c,k) — Asíntotas: y−k = ±(b/a)(x−h) — c² = a² + b²</p>
+
+  <h4>Hipérbola vertical (centro en (h,k))</h4>
+  <p>((y−k)² / a²) − ((x−h)² / b²) = 1</p>
+  <p>Vértices: (h,k±a) — Focos: (h,k±c) — Asíntotas: y−k = ±(a/b)(x−h) — c² = a² + b²</p>
+</section>
+
+        <section id="graph" class="card section fade-in">
+          <h3>Gráfica interactiva</h3>
+          <div class="graph-wrap">
+            <div id="svgBox">
+              <svg id="svg" viewBox="-11 -8 22 16" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="gráfica">
+                <defs>
+                  <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#00d4ff"/><stop offset="1" stop-color="#1a73e8"/></linearGradient>
+                </defs>
+                <g id="axes" stroke="#2b3440" stroke-width="0.02">
+                  <line x1="-10" y1="0" x2="10" y2="0" />
+                  <line x1="0" y1="-8" x2="0" y2="8" />
+                </g>
+                <g id="asym" stroke="#344150" stroke-width="0.03" stroke-dasharray="0.08 0.06"></g>
+                <g id="curve" fill="none" stroke="url(#g1)" stroke-width="0.08" stroke-linecap="round"></g>
+                <g id="points" fill="#fffb" font-size="0.35" text-anchor="middle"></g>
+                <g id="focus" fill="#fffb"></g>
+              </svg>
+            </div>
+
+            <aside class="legend card">
+              <div class="chip">Tipo</div>
+              <div class="chip"><select id="typeSelect" class="input"><option value="horizontal">Hipérbola horizontal</option><option value="vertical">Hipérbola vertical</option><option value="trasladada">Hipérbola trasladada (h,k)</option></select></div>
+
+              <div class="chip">a: <input id="ain" class="input" type="number" value="3" min="0.1" step="0.1"/></div>
+              <div class="chip">b: <input id="bin" class="input" type="number" value="4" min="0.1" step="0.1"/></div>
+              <div class="chip" id="hchip" style="display:none">h: <input id="hin" class="input" type="number" value="2" step="0.1"/></div>
+              <div class="chip" id="kchip" style="display:none">k: <input id="kin" class="input" type="number" value="-1" step="0.1"/></div>
+
+              <div class="chip">c: <span id="cval">5</span></div>
+              <div style="height:8px"></div>
+              <div class="chip">Acciones</div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button class="btn secondary" id="updateBtn">Actualizar</button>
+                <button class="btn" id="resetBtn">Reset</button>
+              </div>
+
+              <div style="height:8px"></div>
+              <div class="chip">Quiz dinámico</div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button class="btn" id="genQuizBtn">Generar pregunta</button>
+                <button class="btn secondary" id="clearQuizBtn">Limpiar</button>
+              </div>
+              <div id="quizArea" style="margin-top:10px"></div>
+            </aside>
+
+          </div>
+          <p class="small" style="margin-top:12px">Arrastrá la gráfica para moverla; elegí el tipo, cambiá a/b/(h,k) y presioná Actualizar para ver la hipérbola y sus asíntotas.</p>
+        </section>
+
+        <section id="exercises" class="card section fade-in">
+  <h3>Ejercicios resueltos</h3>
+
+  <div class="exercise">
+    <p><strong>Ejercicio:</strong> Dada la hipérbola (x²/9) − (y²/4) = 1 — hallar focos y asíntotas</p>
+    <div class="code">a=3, b=2 → c=√13 → Focos (±√13,0). Asíntotas: y=±(2/3)x</div>
+  </div>
+
+  <div class="exercise" style="margin-top:12px">
+    <p><strong>Ejercicio:</strong> Centro (2,−1), vértices (5,−1) y (−1,−1). Ecuación con a=3, b=2:</p>
+    <div class="code">((x−2)²/9) − ((y+1)²/4) = 1</div>
+  </div>
+
+  <div class="exercise" style="margin-top:12px">
+    <p><strong>Ejercicio:</strong> ¿Es hipérbola 4x² − 9y² + 3x − 2y + 1 = 0?</p>
+    <div class="code">Coeficientes de x² e y² con signos opuestos → Sí, es una hipérbola.</div>
+  </div>
+
+  <div class="exercise" style="margin-top:12px">
+    <p><strong>Ejercicio:</strong> Encontrar la ecuación de la hipérbola con focos en (±5,0) y vértices en (±3,0).</p>
+    <div class="code">c=5, a=3 → b=√(c²−a²)=√(25−9)=4 → Ecuación: (x²/9) − (y²/16) = 1</div>
+  </div>
+
+  <div class="exercise" style="margin-top:12px">
+    <p><strong>Ejercicio:</strong> Determinar focos y asíntotas de la hipérbola vertical (y²/25) − (x²/9) = 1.</p>
+    <div class="code">a=5, b=3 → c=√(25+9)=√34 → Focos: (0,±√34). Asíntotas: y=±(5/3)x</div>
+  </div>
+
+  <div class="exercise" style="margin-top:12px">
+    <p><strong>Ejercicio:</strong> Hipérbola trasladada con centro (3,−2), a=4, b=2. Hallar vértices y focos.</p>
+    <div class="code">Vértices: (3±4, −2) → (7,−2) y (−1,−2). c=√(16+4)=√20 → Focos: (3±√20, −2)</div>
+  </div>
+</section>
+
+        <section id="quiz" class="card section fade-in">
+          <h3>Quiz</h3>
+          <div id="quizStatic" class="quiz-grid">
+            <div class="quiz-card">
+              <p><strong>Teoría:</strong> ¿Cuál es la relación entre a, b y c?</p>
+              <div class="option" data-ok="true" onclick="staticAnswer(this,true)">c² = a² + b²</div>
+              <div class="option" onclick="staticAnswer(this,false)">c² = a² − b²</div>
+            </div>
+
+            <div class="quiz-card">
+              <p><strong>Teoría:</strong> Asíntotas de una hipérbola horizontal centrada en el origen</p>
+              <div class="option" data-ok="true" onclick="staticAnswer(this,true)">y = ± (b/a) x</div>
+              <div class="option" onclick="staticAnswer(this,false)">y = ± (a/b) x</div>
+            </div>
+          </div>
+          <div id="quizResult" class="result"></div>
+        </section>
+
+        <section id="applications" class="card section fade-in">
+  <h3>Aplicaciones</h3>
+
+  <div class="card exercise">
+    <p><strong>Localización (GPS / radares):</strong> Los sistemas de posicionamiento usan diferencias de tiempo de llegada de señales. Cada diferencia genera una hipérbola sobre la cual se encuentra el objeto, y al intersectar varias se obtiene la ubicación exacta.</p>
+  </div>
+
+  <div class="card exercise" style="margin-top:12px">
+    <p><strong>Órbitas astronómicas:</strong> Algunas trayectorias de cometas, asteroides o sondas espaciales son hipérbolas. Esto ocurre cuando el objeto posee energía suficiente para escapar de la atracción gravitatoria, siguiendo una órbita abierta.</p>
+  </div>
+
+  <div class="card exercise" style="margin-top:12px">
+    <p><strong>Torres de refrigeración:</strong> Estas estructuras industriales tienen forma de hiperboloide de revolución, lo que les otorga gran estabilidad con una cantidad mínima de material.</p>
+  </div>
+
+  <div class="card exercise" style="margin-top:12px">
+    <p><strong>Acústica y sonar:</strong> Cuando un sonido rebota en un objeto y llega a distintos sensores en tiempos diferentes, los puntos posibles donde ocurrió el rebote forman hipérbolas.</p>
+  </div>
+
+  <div class="card exercise" style="margin-top:12px">
+    <p><strong>Óptica (telescopios):</strong> Algunos telescopios usan espejos hiperbólicos que corrigen aberraciones y permiten concentrar mejor la luz proveniente de estrellas distantes.</p>
+  </div>
+
+  <div class="card exercise" style="margin-top:12px">
+    <p><strong>Comunicaciones inalámbricas:</strong> La triangulación basada en diferencia de señal entre antenas genera curvas hiperbólicas que permiten ubicar dispositivos móviles con precisión.</p>
+  </div>
+
+  <div class="card exercise" style="margin-top:12px">
+    <p><strong>Ingeniería estructural:</strong> Puentes y soportes utilizan barras dispuestas siguiendo curvas hiperbólicas para distribuir tensiones de forma eficiente y resistente.</p>
+  </div>
+</section>
+
+        <footer style="margin-top:18px" class="small">Hecho para presentar: texto ampliado, ejercicios resueltos, gráficos y quiz interactivo.</footer>
+      </main>
+    </div>
+  </div>
+
+<script>
+// wait for DOM
+document.addEventListener('DOMContentLoaded', ()=>{
+  // DOM refs
+  const svg = document.getElementById('svg');
+  const curve = document.getElementById('curve');
+  const asym = document.getElementById('asym');
+  const points = document.getElementById('points');
+  const focusG = document.getElementById('focus');
+  const aIn = document.getElementById('ain');
+  const bIn = document.getElementById('bin');
+  const hIn = document.getElementById('hin');
+  const kIn = document.getElementById('kin');
+  const cVal = document.getElementById('cval');
+  const typeSel = document.getElementById('typeSelect');
+  const updateBtn = document.getElementById('updateBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const genQuizBtn = document.getElementById('genQuizBtn');
+  const clearQuizBtn = document.getElementById('clearQuizBtn');
+  const quizArea = document.getElementById('quizArea');
+
+  // show/hide h,k when trasladada
+  function refreshHKVisibility(){
+    const show = typeSel.value === 'trasladada';
+    document.getElementById('hchip').style.display = show? 'block':'none';
+    document.getElementById('kchip').style.display = show? 'block':'none';
+  }
+  typeSel.addEventListener('change', ()=>{ refreshHKVisibility(); draw(); });
+  refreshHKVisibility();
+
+  // utility
+  function parseNum(el, fallback){ if(!el) return fallback; const v=parseFloat(el.value); return Number.isFinite(v)? v: fallback; }
+  function clearChildren(n){ while(n.firstChild) n.removeChild(n.firstChild); }
+
+  // helpers
+  function createCircle(cx,cy,fill){ const c = document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',0.12); c.setAttribute('fill',fill); return c; }
+  function addText(x,y,text){ const t = document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',x); t.setAttribute('y',y); t.setAttribute('fill','#cfe8ff'); t.setAttribute('font-size',0.32); t.textContent = text; points.appendChild(t); }
+
+  // robust drawing using symmetric parametrization (GeoGebra-like)
+  function computeAndDraw(){
+    const type = typeSel.value;
+    const a = parseNum(aIn,3);
+    const b = parseNum(bIn,4);
+    const h = parseNum(hIn,0);
+    const k = parseNum(kIn,0);
+    const c = Math.sqrt(a*a + b*b);
+    if(cVal) cVal.textContent = c.toFixed(4);
+
+    clearChildren(curve); clearChildren(asym); clearChildren(points); clearChildren(focusG);
+
+    // draw asymptotes
+    const slope = (type==='vertical')? (a/b) : (b/a);
+    const L = 22;
+    function makeAsym(sign){
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',-L);
+      line.setAttribute('y1', k + sign * slope * (-L - h));
+      line.setAttribute('x2', L);
+      line.setAttribute('y2', k + sign * slope * (L - h));
+      line.setAttribute('stroke','rgba(52,65,80,0.9)');
+      line.setAttribute('stroke-width',0.03);
+      asym.appendChild(line);
+    }
+    makeAsym(1); makeAsym(-1);
+
+    // build branches
+    const branches = {left:[], right:[], up:[], down:[]};
+    for(let t = -1.46; t <= 1.46; t += 0.0125){
+      if(Math.abs(t) < 0.008) continue; // skip near asymptote
+      const sec = 1/Math.cos(t);
+      const tan = Math.tan(t);
+      if(type === 'horizontal' || type === 'trasladada'){
+        const xr = h + a * sec;
+        const yr = k + b * tan;
+        const xl = h - a * sec;
+        const yl = k + b * tan;
+        if(isFinite(xr) && isFinite(yr)) branches.right.push({x:xr,y:yr});
+        if(isFinite(xl) && isFinite(yl)) branches.left.push({x:xl,y:yl});
+      } else {
+        const yu = k + a * sec;
+        const xu = h + b * tan;
+        const yd = k - a * sec;
+        const xd = h + b * tan;
+        if(isFinite(xu) && isFinite(yu)) branches.up.push({x:xu,y:yu});
+        if(isFinite(xd) && isFinite(yd)) branches.down.push({x:xd,y:yd});
+      }
+    }
+
+    function makePath(arr){
+      if(!arr || arr.length===0) return;
+      const d = arr.map((p,i)=> (i===0? 'M ':'L ') + p.x.toFixed(4) + ' ' + p.y.toFixed(4)).join(' ');
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('stroke','url(#g1)');
+      path.setAttribute('stroke-width',0.08);
+      path.setAttribute('fill','none');
+      path.setAttribute('stroke-linecap','round');
+      curve.appendChild(path);
+    }
+
+    makePath(branches.left);
+    makePath(branches.right);
+    makePath(branches.up);
+    makePath(branches.down);
+
+    // vertices and foci
+    if(type === 'horizontal' || type === 'trasladada'){
+      const v1x = h + a, v2x = h - a;
+      focusG.appendChild(createCircle(v1x,k,'#ffffff'));
+      focusG.appendChild(createCircle(v2x,k,'#ffffff'));
+      addText(v1x, k - 0.5, '(' + v1x.toFixed(2) + ',' + k.toFixed(2) + ')');
+      addText(v2x, k - 0.5, '(' + v2x.toFixed(2) + ',' + k.toFixed(2) + ')');
+
+      const f1x = h + c, f2x = h - c;
+      focusG.appendChild(createCircle(f1x,k,'#ffd27f'));
+      focusG.appendChild(createCircle(f2x,k,'#ffd27f'));
+      addText(f1x, k + 0.6, 'F(' + f1x.toFixed(2) + ',' + k.toFixed(2) + ')');
+      addText(f2x, k + 0.6, 'F(' + f2x.toFixed(2) + ',' + k.toFixed(2) + ')');
+    } else {
+      const v1y = k + a, v2y = k - a;
+      focusG.appendChild(createCircle(h,v1y,'#ffffff'));
+      focusG.appendChild(createCircle(h,v2y,'#ffffff'));
+      addText(h - 0.6, v1y, '(' + h.toFixed(2) + ',' + v1y.toFixed(2) + ')');
+      addText(h - 0.6, v2y, '(' + h.toFixed(2) + ',' + v2y.toFixed(2) + ')');
+
+      const f1y = k + c, f2y = k - c;
+      focusG.appendChild(createCircle(h,f1y,'#ffd27f'));
+      focusG.appendChild(createCircle(h,f2y,'#ffd27f'));
+      addText(h + 0.8, f1y, 'F(' + h.toFixed(2) + ',' + f1y.toFixed(2) + ')');
+      addText(h + 0.8, f2y, 'F(' + h.toFixed(2) + ',' + f2y.toFixed(2) + ')');
+    }
+  }
+
+  // draw wrapper
+  function draw(){ try{ computeAndDraw(); }catch(err){ console.error('draw error', err); }}
+
+  // wire buttons
+  if(updateBtn) updateBtn.addEventListener('click', draw);
+  if(resetBtn) resetBtn.addEventListener('click', ()=>{ if(svg) svg.setAttribute('viewBox','-11 -8 22 16'); });
+
+  // pan/drag
+  (function(){ if(!svg) return; let isDown=false, startX=0, startY=0; const svgEl = svg;
+    svgEl.addEventListener('pointerdown', e=>{ isDown=true; startX=e.clientX; startY=e.clientY; try{ svgEl.setPointerCapture(e.pointerId);}catch(e){} });
+    svgEl.addEventListener('pointermove', e=>{ if(!isDown) return; const vb = svgEl.getAttribute('viewBox').split(' ').map(parseFloat); const dx=(startX-e.clientX)*(vb[2]/svgEl.clientWidth); const dy=(e.clientY-startY)*(vb[3]/svgEl.clientHeight); const nx=vb[0]+dx; const ny=vb[1]+dy; svgEl.setAttribute('viewBox', nx+' '+ny+' '+vb[2]+' '+vb[3]); startX=e.clientX; startY=e.clientY; });
+    svgEl.addEventListener('pointerup', e=>{ isDown=false; try{ svgEl.releasePointerCapture(e.pointerId);}catch(e){} });
+  })();
+
+  // initial draw
+  draw();
+
+  // Quiz generation based on current parameters
+  function generateQuiz(){
+    clearChildren(quizArea);
+    const type = typeSel.value; const a = parseNum(aIn,3); const b = parseNum(bIn,4); const h = parseNum(hIn,0); const k = parseNum(kIn,0); const c = Math.sqrt(a*a + b*b);
+    const qType = Math.floor(Math.random()*3);
+    if(qType===0){
+      const correct = c.toFixed(3);
+      const choices = [correct, (c+1).toFixed(3), Math.abs(c-1).toFixed(3)]; shuffle(choices);
+      renderQuiz('¿Cuál es el valor de c = √(a² + b²) para la hipérbola actual?', choices, correct);
+    } else if(qType===1){
+      let correct;
+      if(type==='vertical') correct = `(${h.toFixed(2)}, ${ (k+a).toFixed(2) }) y (${h.toFixed(2)}, ${ (k-a).toFixed(2) })`;
+      else correct = `(${ (h+a).toFixed(2) }, ${k.toFixed(2)}) y (${ (h-a).toFixed(2) }, ${k.toFixed(2)})`;
+      const wrong1 = '('+ (h+ a +1).toFixed(2) +','+ k.toFixed(2) +') y ('+(h-a-1).toFixed(2)+','+k.toFixed(2)+')';
+      const wrong2 = '('+ (h+ (a/2)).toFixed(2) +','+ k.toFixed(2) +') y ('+(h-(a/2)).toFixed(2)+','+k.toFixed(2)+')';
+      const choices=[correct,wrong1,wrong2]; shuffle(choices); renderQuiz('¿Cuáles son los vértices de la hipérbola actual?', choices, correct);
+    } else {
+      let correct;
+      if(type==='vertical') correct = `y - ${k.toFixed(2)} = ± ${ (a/b).toFixed(3) } (x - ${h.toFixed(2)})`;
+      else correct = `y - ${k.toFixed(2)} = ± ${ (b/a).toFixed(3) } (x - ${h.toFixed(2)})`;
+      const wrong1 = `y - ${k.toFixed(2)} = ± ${ (a/b+0.5).toFixed(3) } (x - ${h.toFixed(2)})`;
+      const wrong2 = `y - ${k.toFixed(2)} = ± ${ (b/a+0.5).toFixed(3) } (x - ${h.toFixed(2)})`;
+      const choices=[correct,wrong1,wrong2]; shuffle(choices); renderQuiz('¿Cuál es la ecuación de las asíntotas para la hipérbola actual?', choices, correct);
+    }
+  }
+
+  function renderQuiz(prompt, choices, correct){
+    const card = document.createElement('div'); card.className='quiz-card';
+    const p = document.createElement('p'); p.innerHTML = '<strong>Pregunta:</strong> ' + prompt; card.appendChild(p);
+    choices.forEach(ch=>{
+      const d = document.createElement('div'); d.className='option'; d.textContent = ch;
+      d.addEventListener('click', ()=>{ if(ch === correct){ d.classList.add('correct'); clearChildren(document.querySelectorAll('#quizArea .option')); quizArea.insertAdjacentHTML('beforeend','<div class="result" style="color:#77e08a">✔️ Correcto</div>'); } else { d.classList.add('wrong'); quizArea.insertAdjacentHTML('beforeend','<div class="result" style="color:#ff7b7b">❌ Incorrecto</div>'); } });
+      card.appendChild(d);
+    });
+    quizArea.appendChild(card);
+  }
+
+  if(genQuizBtn) genQuizBtn.addEventListener('click', generateQuiz);
+  if(clearQuizBtn) clearQuizBtn.addEventListener('click', ()=>{ clearChildren(quizArea); });
+
+  // small helpers
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+  function parseNum(el,fb){ if(!el) return fb; const v=parseFloat(el.value); return Number.isFinite(v)? v: fb; }
+  function clearChildren(n){ if(!n) return; while(n.firstChild) n.removeChild(n.firstChild); }
+
+  // expose draw globally
+  window.draw = draw;
+  window.resetView = ()=>{ if(svg) svg.setAttribute('viewBox','-11 -8 22 16'); };
+
+  // static quiz handlers
+  window.staticAnswer = function(el,ok){ if(ok){ el.classList.add('correct'); document.getElementById('quizResult').textContent='✔️ Correcto'; document.getElementById('quizResult').style.color='#77e08a'; } else { el.classList.add('wrong'); document.getElementById('quizResult').textContent='❌ Incorrecto'; document.getElementById('quizResult').style.color='#ff7b7b'; } el.parentElement.querySelectorAll('.option').forEach(o=>o.onclick=null); };
+
+}); // DOMContentLoaded
+
+function openShare(){ alert('Si querés exportar: guarda esta página como .html y subila a tu hosting.'); }
+</script>
+</body>
+</html>
